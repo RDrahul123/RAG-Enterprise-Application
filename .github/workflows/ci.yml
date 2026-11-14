@@ -1,0 +1,47 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      # Deliberately excludes torch / transformers: CI runs the hashed-embedding
+      # and lexical-reranker paths, so the suite finishes in seconds instead of
+      # downloading gigabytes of weights on every push.
+      - name: Install lightweight dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install fastapi "uvicorn[standard]" pydantic numpy faiss-cpu rank-bm25 \
+                      pypdf python-multipart httpx pytest reportlab
+
+      - name: Run tests
+        env:
+          RAG_USE_REAL_MODELS: "0"
+        run: pytest tests -v
+
+      - name: Smoke-test ingestion and the API
+        env:
+          RAG_USE_REAL_MODELS: "0"
+        run: |
+          python scripts/make_sample_corpus.py
+          python scripts/ingest.py
+          python -c "
+          from fastapi.testclient import TestClient
+          from app.main import app
+          client = TestClient(app)
+          assert client.get('/api/health').json()['index_ready'] is True
+          body = client.post('/api/ask', json={'question': 'How many days of annual leave?'}).json()
+          assert body['citations'], 'expected at least one citation'
+          print('smoke ok:', body['citations'][0]['doc_title'], 'page', body['citations'][0]['page_number'])
+          "

@@ -1,0 +1,32 @@
+{"id": "q01", "question": "How many days of paid annual leave do employees receive?", "doc": "Northwind_Employee_Handbook.pdf", "page": 2, "expect": ["24"]}
+{"id": "q02", "question": "How many unused leave days can be carried over into the next year?", "doc": "Northwind_Employee_Handbook.pdf", "page": 2, "expect": ["five", "5"]}
+{"id": "q03", "question": "What is the probation period for new employees?", "doc": "Northwind_Employee_Handbook.pdf", "page": 1, "expect": ["90"]}
+{"id": "q04", "question": "How many days per week must employees be in the office under the hybrid model?", "doc": "Northwind_Employee_Handbook.pdf", "page": 3, "expect": ["three", "3"]}
+{"id": "q05", "question": "Within how many days must business expenses be submitted?", "doc": "Northwind_Employee_Handbook.pdf", "page": 4, "expect": ["30"]}
+{"id": "q06", "question": "What flight class applies to flights longer than nine hours?", "doc": "Northwind_Employee_Handbook.pdf", "page": 4, "expect": ["business"]}
+{"id": "q07", "question": "How long is parental leave for the primary caregiver?", "doc": "Northwind_Employee_Handbook.pdf", "page": 2, "expect": ["16"]}
+{"id": "q08", "question": "What is the minimum password length requirement?", "doc": "Northwind_Security_Policy.pdf", "page": 2, "expect": ["14"]}
+{"id": "q09", "question": "Within what time must a suspected security incident be reported?", "doc": "Northwind_Security_Policy.pdf", "page": 3, "expect": ["one hour", "1 hour"]}
+{"id": "q10", "question": "Within how many hours must a personal data breach be notified to the supervisory authority?", "doc": "Northwind_Security_Policy.pdf", "page": 3, "expect": ["72"]}
+{"id": "q11", "question": "How often are access rights reviewed?", "doc": "Northwind_Security_Policy.pdf", "page": 2, "expect": ["quarterly", "quarter"]}
+{"id": "q12", "question": "How long do Atlas API access tokens remain valid?", "doc": "Atlas_Platform_API_Guide.pdf", "page": 1, "expect": ["3,600", "3600"]}
+{"id": "q13", "question": "What is the rate limit for enterprise plans?", "doc": "Atlas_Platform_API_Guide.pdf", "page": 2, "expect": ["5,000", "5000"]}
+{"id": "q14", "question": "What is the maximum page size for cursor pagination?", "doc": "Atlas_Platform_API_Guide.pdf", "page": 2, "expect": ["200"]}
+{"id": "q15", "question": "What HTTP status code is returned when a rate limit is exceeded?", "doc": "Atlas_Platform_API_Guide.pdf", "page": 2, "expect": ["429"]}
+{"id": "q16", "question": "How long are Idempotency-Key values retained?", "doc": "Atlas_Platform_API_Guide.pdf", "page": 3, "expect": ["24"]}
+{"id": "q17", "question": "What is the maximum upload file size for the documents endpoint?", "doc": "Atlas_Platform_API_Guide.pdf", "page": 3, "expect": ["100"]}
+{"id": "q18", "question": "How much does the Starter plan cost per user per month?", "doc": "Atlas_Product_Brief.pdf", "page": 1, "expect": ["49"]}
+{"id": "q19", "question": "What uptime percentage does the enterprise SLA commit to?", "doc": "Atlas_Product_Brief.pdf", "page": 2, "expect": ["99.95"]}
+{"id": "q20", "question": "Within what time must a Severity 1 incident receive a response?", "doc": "Northwind_Security_Policy.pdf", "page": 3, "expect": ["15"]}
+{"id": "q21", "question": "How many pages per month does the Growth plan include?", "doc": "Atlas_Product_Brief.pdf", "page": 1, "expect": ["25,000", "25000"]}
+{"id": "q22", "question": "Who must approve expenses above EUR 5,000?", "doc": "Northwind_Employee_Handbook.pdf", "page": 4, "expect": ["CFO"]}
+{"id": "q23", "question": "How long are support tickets kept before they are deleted?", "doc": "Northwind_Data_Retention_Policy.pdf", "page": 2, "expect": ["24 months", "24"]}
+{"id": "q24", "question": "What is the largest discount an account executive may approve on their own?", "doc": "Northwind_Sales_Playbook.pdf", "page": 2, "expect": ["15"]}
+{"id": "q25", "question": "What is the first response target for a Severity 2 customer ticket?", "doc": "Atlas_Customer_Support_Handbook.pdf", "page": 2, "expect": ["4 hours", "four hours"]}
+{"id": "q26", "question": "How much cyber liability insurance are vendors required to carry?", "doc": "Northwind_Vendor_Onboarding_Guide.pdf", "page": 3, "expect": ["5 million"]}
+{"id": "q27", "question": "Within how many hours must a vendor report a security incident to Northwind?", "doc": "Northwind_Vendor_Onboarding_Guide.pdf", "page": 2, "expect": ["24"]}
+{"id": "q28", "question": "How long does a standard proof of value engagement run?", "doc": "Northwind_Sales_Playbook.pdf", "page": 3, "expect": ["30"]}
+{"id": "q29", "question": "How long are internal chat messages retained?", "doc": "Northwind_Data_Retention_Policy.pdf", "page": 2, "expect": ["90"]}
+{"id": "q30", "question": "How many controls does the vendor security questionnaire contain?", "doc": "Northwind_Vendor_Onboarding_Guide.pdf", "page": 2, "expect": ["140"]}
+{"id": "q31", "question": "Within how many days must a data subject erasure request be completed?", "doc": "Northwind_Data_Retention_Policy.pdf", "page": 3, "expect": ["30"]}
+{"id": "q32", "question": "How often must vendor security assessments be refreshed?", "doc": "Northwind_Vendor_Onboarding_Guide.pdf", "page": 2, "expect": ["12 months", "12"]}

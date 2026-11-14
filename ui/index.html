@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Enterprise RAG · Document Intelligence</title>
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📄</text></svg>" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="mark">◧</span>
+      <div>
+        <h1>Enterprise RAG</h1>
+        <p>document intelligence with page-level citations</p>
+      </div>
+    </div>
+    <div class="pills" id="pills" aria-live="polite"></div>
+  </header>
+
+  <main class="layout">
+    <section class="chatcol">
+      <div class="chat" id="chat">
+        <div class="welcome" id="welcome">
+          <h2>Ask across your document corpus</h2>
+          <p>
+            Hybrid retrieval (dense + BM25), cross-encoder reranking, and answers that cite the
+            document and page they came from.
+          </p>
+          <div class="suggestions" id="suggestions"></div>
+        </div>
+        <div class="messages" id="messages"></div>
+      </div>
+    </section>
+
+    <aside class="sources" id="sourcesPanel">
+      <div class="sources-head">
+        <h3>Sources</h3>
+        <button class="ghost" id="clearSources" title="Clear">clear</button>
+      </div>
+      <div class="sources-body" id="sourcesBody">
+        <p class="empty">Retrieved passages and their ranking appear here.</p>
+      </div>
+    </aside>
+  </main>
+
+  <footer class="composer">
+    <form id="askForm" autocomplete="off">
+      <textarea id="question" rows="1" placeholder="Ask a question about the indexed documents…" aria-label="Question"></textarea>
+      <button type="submit" id="askBtn"><span>Ask</span></button>
+    </form>
+    <div class="underbar">
+      <span class="hint">Enter to send · Shift+Enter for a new line</span>
+      <div class="actions">
+        <label class="ghost file">
+          Upload PDF<input type="file" id="fileInput" accept=".pdf,.md,.txt" multiple hidden />
+        </label>
+        <button class="ghost" id="reindexBtn" type="button">Reindex</button>
+      </div>
+    </div>
+  </footer>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script src="/app.js"></script>
+</body>
+</html>
