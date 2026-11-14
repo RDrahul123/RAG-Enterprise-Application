@@ -31,7 +31,7 @@ jobs:
       - name: Run tests
         env:
           RAG_USE_LLM: "0"
-        run: pytest tests -v
+        run: python -m pytest tests -v
 
       - name: Smoke-test ingestion and the API
         env:
