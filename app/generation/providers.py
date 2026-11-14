@@ -16,14 +16,11 @@ from __future__ import annotations
 
 import importlib.util
 import os
-import re
 from dataclasses import dataclass, field
 from pathlib import Path
 
 from app.config import Settings
 from app.observability import log_event
-
-_WORD = re.compile(r"[a-z0-9]+")
 
 
 @dataclass
@@ -91,13 +88,14 @@ class LocalProvider(BaseProvider):
             {"role": "user", "content": user},
         ]
         do_sample = self.temperature > 0
-        out = pipe(
-            messages,
-            max_new_tokens=self.max_new_tokens,
-            do_sample=do_sample,
-            temperature=self.temperature if do_sample else None,
-            return_full_text=False,
-        )
+        kwargs = {
+            "max_new_tokens": self.max_new_tokens,
+            "do_sample": do_sample,
+            "return_full_text": False,
+        }
+        if do_sample:
+            kwargs["temperature"] = self.temperature
+        out = pipe(messages, **kwargs)
         text = out[0]["generated_text"]
         if isinstance(text, list):  # some pipelines return chat messages
             text = text[-1].get("content", "")
