@@ -68,7 +68,8 @@ class Settings:
     llm_model: str = os.getenv("RAG_LLM_MODEL", "Qwen/Qwen2.5-1.5B-Instruct")
     hf_token: str | None = os.getenv("HF_TOKEN") or os.getenv("HUGGINGFACEHUB_API_TOKEN")
     max_new_tokens: int = _int("RAG_MAX_NEW_TOKENS", 512)
-    temperature: float = _float("RAG_TEMPERATURE", 0.1)
+    # 0 = greedy decoding: deterministic answers, reproducible evals.
+    temperature: float = _float("RAG_TEMPERATURE", 0.0)
 
     @property
     def vectors_path(self) -> Path:

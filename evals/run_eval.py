@@ -12,6 +12,7 @@ import argparse
 import json
 import sys
 import time
+from dataclasses import replace
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -67,7 +68,13 @@ def keyword_hit(answer: str, expectations: list[str]) -> bool:
     return any(e.lower().replace(",", "").replace(" ", "") in lowered for e in expectations)
 
 
-def evaluate(pipeline: RetrievalPipeline, golden: list[dict], k: int, run_answers: bool) -> dict:
+def evaluate(
+    pipeline: RetrievalPipeline,
+    golden: list[dict],
+    k: int,
+    run_answers: bool,
+    provider_override: str | None = None,
+) -> dict:
     table: dict[str, dict] = {}
 
     for mode in MODES:
@@ -100,7 +107,12 @@ def evaluate(pipeline: RetrievalPipeline, golden: list[dict], k: int, run_answer
         from app.generation.providers import build_provider
         from app.generation.rag import RagEngine
 
-        engine = RagEngine(pipeline, pipeline.settings, build_provider(pipeline.settings))
+        eval_settings = (
+            replace(pipeline.settings, llm_provider=provider_override)
+            if provider_override
+            else pipeline.settings
+        )
+        engine = RagEngine(pipeline, eval_settings, build_provider(eval_settings))
         correct = 0
         grounded = 0
         cite_correct = 0
@@ -163,6 +175,12 @@ def main() -> None:
     parser.add_argument("--k", type=int, default=5)
     parser.add_argument("--limit", type=int, default=None)
     parser.add_argument("--no-answers", action="store_true", help="Retrieval metrics only (fast).")
+    parser.add_argument(
+        "--provider",
+        default="extractive",
+        choices=["extractive", "local", "hf_api", "auto"],
+        help="LLM backend for the answer phase. Defaults to extractive for reproducibility.",
+    )
     parser.add_argument("--out", type=Path, default=Path(__file__).resolve().parent / "results.json")
     args = parser.parse_args()
 
@@ -170,7 +188,13 @@ def main() -> None:
     pipeline = RetrievalPipeline.from_disk(settings)
     golden = load_golden(args.limit)
 
-    report = evaluate(pipeline, golden, args.k, run_answers=not args.no_answers)
+    report = evaluate(
+        pipeline,
+        golden,
+        args.k,
+        run_answers=not args.no_answers,
+        provider_override=args.provider,
+    )
     print(render(report))
 
     args.out.write_text(json.dumps(report, indent=2), encoding="utf-8")

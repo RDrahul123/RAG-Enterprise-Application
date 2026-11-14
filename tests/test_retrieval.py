@@ -50,3 +50,30 @@ def test_unrelated_question_still_returns_sources_or_refuses(service: RagService
     assert response.answer.strip()
     if "don't have enough information" in response.answer.lower():
         assert response.citations == []
+
+
+def test_extractive_provider_matches_plural_forms():
+    """Regression: 'password' must match 'passwords' in the no-LLM baseline."""
+    from app.generation.rag import extractive_answer
+    from app.models import Chunk, ScoredChunk
+
+    chunk = Chunk(
+        chunk_id="c1",
+        doc_id="d1",
+        doc_title="Security Policy",
+        source_path="security.pdf",
+        page_number=2,
+        position=0,
+        text="Passwords must be at least 14 characters and are checked against a breach corpus.",
+        token_count=14,
+    )
+    answer = extractive_answer("What is the minimum password length?", [ScoredChunk(chunk=chunk, score=1.0)])
+    assert "14 characters" in answer
+    assert "[1]" in answer
+
+
+def test_grounding_score_treats_trailing_citation_as_part_of_sentence():
+    from app.generation.rag import grounding_score
+
+    assert grounding_score("Parental leave is 16 weeks fully paid. [1]", 3) == 1.0
+    assert grounding_score("This sentence has no citation at all in it.", 3) == 0.0

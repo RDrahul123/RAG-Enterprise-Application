@@ -20,17 +20,20 @@ from app.retrieval.pipeline import RetrievalPipeline
 
 _CITE = re.compile(r"\[(\d+)\]")
 _SENTENCE = re.compile(r"(?<=[.!?])\s+")
+# "…caregiver. [1]" must count as one cited sentence, not two fragments.
+_TRAILING_CITE = re.compile(r"([.!?])\s+(?=\[\d+\])")
 _TERM = re.compile(r"[a-z0-9]+")
 
 SYSTEM_PROMPT = (
-    "You are an enterprise document assistant. Answer strictly from the provided "
-    "sources. Rules:\n"
-    "1. Cite the source number in square brackets after every factual claim, e.g. [2].\n"
-    "2. Use only the sources. Never use outside knowledge.\n"
-    "3. If the sources do not contain the answer, say exactly: "
+    "You are an enterprise document assistant. Answer strictly from the numbered sources.\n"
+    "Rules:\n"
+    "1. Every sentence that states a fact must end with the number of the source that contains "
+    "it, written in square brackets, for example [2].\n"
+    "2. Cite the source that actually contains the fact. Do not default to [1].\n"
+    "3. Never use outside knowledge.\n"
+    "4. If the sources do not contain the answer, reply exactly: "
     "\"I don't have enough information in the provided documents to answer that.\"\n"
-    "4. Be concise and specific. Prefer numbers, names and dates from the sources.\n"
-    "5. Do not invent source numbers that are not in the list."
+    "5. Answer in one to three short sentences. No preamble and do not restate the question."
 )
 
 REFUSAL = "I don't have enough information in the provided documents to answer that."
@@ -44,6 +47,17 @@ _STOP = frozenset(
 
 def _truncate(text: str, limit: int = 1200) -> str:
     return text if len(text) <= limit else text[: limit - 1].rsplit(" ", 1)[0] + "…"
+
+
+def _stem(token: str) -> str:
+    """Crude plural stripping so 'password' matches 'passwords'.
+
+    The extractive provider is the no-LLM baseline; without this it refuses
+    perfectly answerable questions purely because of an English plural.
+    """
+    if len(token) > 3 and token.endswith("s") and not token.endswith("ss"):
+        return token[:-1]
+    return token
 
 
 def build_prompt(question: str, results: list[ScoredChunk]) -> str:
@@ -64,7 +78,7 @@ def build_prompt(question: str, results: list[ScoredChunk]) -> str:
 
 def extractive_answer(question: str, results: list[ScoredChunk], max_sentences: int = 3) -> str:
     """Deterministic, zero-hallucination baseline used when no LLM is configured."""
-    terms = {t for t in _TERM.findall(question.lower()) if t not in _STOP and len(t) > 2}
+    terms = {_stem(t) for t in _TERM.findall(question.lower()) if t not in _STOP and len(t) > 2}
     candidates: list[tuple[float, int, str]] = []
 
     for i, result in enumerate(results, start=1):
@@ -72,7 +86,7 @@ def extractive_answer(question: str, results: list[ScoredChunk], max_sentences: 
             sentence = sentence.strip()
             if len(sentence) < 30:
                 continue
-            tokens = set(_TERM.findall(sentence.lower()))
+            tokens = {_stem(t) for t in _TERM.findall(sentence.lower())}
             overlap = len(terms & tokens) / max(1, len(terms))
             if overlap > 0:
                 candidates.append((overlap + result.score / 100.0, i, sentence))
@@ -97,7 +111,8 @@ def extractive_answer(question: str, results: list[ScoredChunk], max_sentences: 
 
 
 def grounding_score(answer: str, max_index: int) -> float:
-    sentences = [s for s in _SENTENCE.split(answer) if len(s.strip()) > 20]
+    text = _TRAILING_CITE.sub(r"\1", answer)
+    sentences = [s for s in _SENTENCE.split(text) if len(s.strip()) > 20]
     if not sentences:
         return 0.0
     cited = 0

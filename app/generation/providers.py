@@ -73,12 +73,12 @@ class LocalProvider(BaseProvider):
             from transformers import pipeline
 
             log_event("llm_loading", provider="local", model=self.model)
-            self._pipe = pipeline(
-                "text-generation",
-                model=self.model,
-                device_map=None,
-                torch_dtype="auto",
-            )
+            kwargs = {"model": self.model, "device_map": None}
+            try:
+                # transformers >= 4.56 renamed torch_dtype -> dtype
+                self._pipe = pipeline("text-generation", dtype="auto", **kwargs)
+            except TypeError:
+                self._pipe = pipeline("text-generation", torch_dtype="auto", **kwargs)
         return self._pipe
 
     def generate(self, system: str, user: str) -> GenerationResult:
@@ -133,7 +133,8 @@ class HFAPIProvider(BaseProvider):
                 {"role": "user", "content": user},
             ],
             max_tokens=self.max_new_tokens,
-            temperature=self.temperature,
+            # Some hosted APIs reject temperature=0 outright.
+            temperature=max(self.temperature, 0.01),
         )
         return GenerationResult(
             text=response.choices[0].message.content.strip(),

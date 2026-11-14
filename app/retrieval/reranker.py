@@ -46,12 +46,17 @@ class LexicalReranker(BaseReranker):
     def rerank(self, query: str, texts: list[str]) -> list[float]:
         from app.retrieval.bm25 import STOPWORDS
 
-        terms = {t for t in _WORD.findall(query.lower()) if t not in STOPWORDS and len(t) > 2}
+        def stem(token: str) -> str:
+            if len(token) > 3 and token.endswith("s") and not token.endswith("ss"):
+                return token[:-1]
+            return token
+
+        terms = {stem(t) for t in _WORD.findall(query.lower()) if t not in STOPWORDS and len(t) > 2}
         if not terms:
             return [0.0 for _ in texts]
         scores: list[float] = []
         for text in texts:
-            tokens = set(_WORD.findall(text.lower()))
+            tokens = {stem(t) for t in _WORD.findall(text.lower())}
             hit = len(terms & tokens)
             scores.append(hit / len(terms))
         return scores

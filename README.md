@@ -3,7 +3,7 @@
 **Document intelligence with hybrid retrieval, cross-encoder reranking, and page-level citations.**
 
 ![Python](https://img.shields.io/badge/python-3.10%2B-blue)
-![Tests](https://img.shields.io/badge/tests-17%20passing-brightgreen)
+![Tests](https://img.shields.io/badge/tests-19%20passing-brightgreen)
 ![Cost](https://img.shields.io/badge/inference-%240%20local-success)
 ![License](https://img.shields.io/badge/license-MIT-lightgrey)
 
@@ -91,8 +91,11 @@ hand against specific pages, plus an ablation harness that measures what each
 stage contributes.
 
 ```bash
-make eval
+make eval                                            # extractive baseline, ~5s
+.venv/bin/python evals/run_eval.py --provider local  # with the local LLM
 ```
+
+**Retrieval ablation** (identical for both backends):
 
 ```
 Retrieval ablation (n=32 questions, k=5)
@@ -101,31 +104,40 @@ mode              recall@k       MRR     latency
 ------------------------------------------------
 dense                1.000     0.969        9.6ms
 bm25                 0.969     0.969        6.0ms
-hybrid               1.000     0.969        6.1ms
-hybrid+rerank        1.000     1.000       45.2ms
-
-Answers (extractive / none)
-------------------------------------------------
-  answer accuracy        0.844
-  grounded rate          0.969
-  citation page accuracy 0.969
-  mean answer latency    45 ms
+hybrid               1.000     0.969        6.4ms
+hybrid+rerank        1.000     1.000       48.2ms
 ```
 
-**How to read this honestly.** `recall@5` hits 1.000 for dense retrieval because
-the sample corpus is 25 chunks — small enough that semantic search already
-saturates. The number that separates the configurations is **MRR**: reranking
-lifts the correct page to rank 1 in every case, which is exactly the effect it is
-supposed to have. On a real corpus of thousands of chunks, absolute recall drops
-substantially (typically 0.70–0.90 in my experience) and the gap between dense,
-hybrid and reranked widens. The harness is the deliverable here, not the
-saturated numbers — point `evals/golden_set.jsonl` at your own documents and it
-reports the truth.
+**Answer quality**, same retrieval, two different generation backends:
 
-The answer metrics were produced by the **extractive provider** (no LLM). That is
-deliberate: it is the control group. If a full LLM does not beat 0.844 answer
-accuracy on a 32-question set, something is wrong with the retrieval, not the
-model.
+| Backend | Answer accuracy | Grounded rate | Citation page accuracy | Mean latency |
+|---|---|---|---|---|
+| `extractive` (no LLM) | 0.875 | 1.000 | **1.000** | 53 ms |
+| `Qwen2.5-1.5B-Instruct` (local, CPU) | **0.906** | 0.812 | 0.688 | 1,300 ms |
+
+**The interesting result.** The LLM answers more questions correctly (0.906 vs
+0.875) but attributes them far less reliably (0.688 vs 1.000). A 1.5B model on CPU
+knows the fact but drifts toward `[1]` when the supporting passage is `[3]`. That
+is precisely why citation correctness is validated in application code — mapping
+markers to real chunks, pages and snippets — rather than trusted from the model.
+It is also why the extractive provider earns its place: it is duller to read, but
+every sentence it emits is verbatim from a cited page.
+
+Generation uses greedy decoding (`RAG_TEMPERATURE=0`), so these numbers are
+bit-for-bit reproducible across runs.
+
+**How to read the recall numbers honestly.** `recall@5` hits 1.000 for dense
+retrieval because the sample corpus is 25 chunks — small enough that semantic
+search already saturates. The number that separates the configurations is **MRR**:
+reranking lifts the correct page to rank 1 in every case, which is exactly the
+effect it is supposed to have. On a real corpus of thousands of chunks, absolute
+recall drops substantially (typically 0.70–0.90 in my experience) and the gap
+between dense, hybrid and reranked widens. The harness is the deliverable here,
+not the saturated numbers — point `evals/golden_set.jsonl` at your own documents
+and it reports the truth.
+
+Both runs are committed: `evals/results.json` (local LLM) and
+`evals/results_extractive.json` (baseline).
 
 ---
 
@@ -309,7 +321,7 @@ rag-enterprise/
 ├── ui/                        # vanilla JS chat UI with citation chips
 ├── evals/                     # golden set + ablation harness
 ├── scripts/                   # sample corpus, ingest, CLI ask
-├── tests/                     # 17 tests, no model downloads
+├── tests/                     # 19 tests, no model downloads
 ├── Dockerfile / docker-compose.yml
 └── .github/workflows/ci.yml
 ```

@@ -35,9 +35,31 @@ function fmtMs(ms) {
 
 /* ------------------------------------------------------- citation markup */
 function renderAnswer(text) {
-  const escaped = escapeHtml(text);
-  // Turn [n] into clickable chips, but only where it looks like a citation.
-  return escaped.replace(/\[(\d{1,2})\]/g, (_, n) => `<button class="cite" data-idx="${n}">${n}</button>`);
+  const html = escapeHtml(text).replace(
+    /\[(\d{1,2})\]/g,
+    (_, n) => `<button class="cite" data-idx="${n}">${n}</button>`
+  );
+
+  const out = [];
+  let inList = false;
+  for (const raw of html.split("\n")) {
+    const line = raw.trim();
+    if (line.startsWith("- ")) {
+      if (!inList) {
+        out.push("<ul>");
+        inList = true;
+      }
+      out.push(`<li>${line.slice(2)}</li>`);
+      continue;
+    }
+    if (inList) {
+      out.push("</ul>");
+      inList = false;
+    }
+    if (line) out.push(`<p>${line}</p>`);
+  }
+  if (inList) out.push("</ul>");
+  return out.join("");
 }
 
 /* ---------------------------------------------------------------- sources */
