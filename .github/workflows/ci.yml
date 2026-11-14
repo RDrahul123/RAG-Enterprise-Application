@@ -16,32 +16,34 @@ jobs:
           python-version: "3.12"
           cache: pip
 
-      # Deliberately excludes torch / transformers: CI runs the hashed-embedding
-      # and lexical-reranker paths, so the suite finishes in seconds instead of
-      # downloading gigabytes of weights on every push.
-      - name: Install lightweight dependencies
+      - name: Cache models
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/huggingface
+          key: hf-bge-small-msmarco
+
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install fastapi "uvicorn[standard]" pydantic numpy faiss-cpu rank-bm25 \
-                      pypdf python-multipart httpx pytest reportlab
+          pip install --index-url https://download.pytorch.org/whl/cpu torch
+          pip install -r requirements.txt
 
       - name: Run tests
         env:
-          RAG_USE_REAL_MODELS: "0"
+          RAG_USE_LLM: "0"
         run: pytest tests -v
 
       - name: Smoke-test ingestion and the API
         env:
-          RAG_USE_REAL_MODELS: "0"
+          RAG_USE_LLM: "0"
         run: |
-          python scripts/make_sample_corpus.py
-          python scripts/ingest.py
+          python ingest.py
           python -c "
           from fastapi.testclient import TestClient
-          from app.main import app
+          from app import app
           client = TestClient(app)
-          assert client.get('/api/health').json()['index_ready'] is True
+          assert client.get('/api/health').json()['indexed'] is True
           body = client.post('/api/ask', json={'question': 'How many days of annual leave?'}).json()
           assert body['citations'], 'expected at least one citation'
-          print('smoke ok:', body['citations'][0]['doc_title'], 'page', body['citations'][0]['page_number'])
+          print('smoke ok:', body['citations'][0]['doc'], 'page', body['citations'][0]['page'])
           "

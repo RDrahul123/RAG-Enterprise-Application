@@ -4,7 +4,7 @@ Four documents, 13 pages total, full of specific dates, numbers and policy
 details. That specificity is the point: it makes citations checkable by hand and
 gives the eval harness objective answers to grade against.
 
-    python scripts/make_sample_corpus.py
+    python make_corpus.py
 """
 
 from __future__ import annotations
@@ -16,7 +16,7 @@ from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
 from reportlab.platypus import PageBreak, Paragraph, SimpleDocTemplate, Spacer
 
-OUT = Path(__file__).resolve().parent.parent / "data" / "docs"
+OUT = Path(__file__).resolve().parent / "data" / "docs"
 
 styles = getSampleStyleSheet()
 H1 = ParagraphStyle("H1", parent=styles["Heading1"], fontSize=20, spaceAfter=14, leading=24)
@@ -600,7 +600,7 @@ def build(name: str, spec: dict) -> Path:
 def main() -> None:
     created = [build(name, spec) for name, spec in DOCUMENTS.items()]
     for path in created:
-        print(f"  created {path.relative_to(OUT.parent.parent)}")
+        print(f"  created {path.relative_to(OUT.parent)}")
     print(f"\n{len(created)} documents written to {OUT}")
 
 

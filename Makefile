@@ -1,11 +1,11 @@
-.PHONY: help install corpus ingest run test eval docker clean pull-model
+.PHONY: help install corpus ingest run test eval pull-model docker clean
 
 help:
 	@echo "make install     install dependencies into .venv"
 	@echo "make corpus      generate the sample PDF corpus"
 	@echo "make ingest      build the vector + BM25 index"
 	@echo "make run         start the API and UI on :8000"
-	@echo "make test        run the test suite (no model downloads)"
+	@echo "make test        run the test suite"
 	@echo "make eval        run the retrieval/answer evaluation"
 	@echo "make pull-model  pre-download the local LLM"
 	@echo "make docker      build and run with docker compose"
@@ -17,19 +17,19 @@ install:
 	.venv/bin/python -m pip install -r requirements.txt
 
 corpus:
-	.venv/bin/python scripts/make_sample_corpus.py
+	.venv/bin/python make_corpus.py
 
 ingest:
-	.venv/bin/python scripts/ingest.py
+	.venv/bin/python ingest.py
 
 run:
-	.venv/bin/uvicorn app.main:app --reload --port 8000
+	.venv/bin/uvicorn app:app --reload --port 8000
 
 test:
-	RAG_USE_REAL_MODELS=0 .venv/bin/python -m pytest tests -q
+	.venv/bin/python -m pytest tests
 
 eval:
-	.venv/bin/python evals/run_eval.py --k 5
+	.venv/bin/python eval.py
 
 pull-model:
 	.venv/bin/python -c "from transformers import pipeline; \
@@ -39,5 +39,5 @@ docker:
 	docker compose up --build
 
 clean:
-	rm -rf data/index/* .pytest_cache .ruff_cache
+	rm -rf data/index/* .pytest_cache .ruff_cache results.json
 	find . -name "__pycache__" -type d -prune -exec rm -rf {} +

@@ -358,7 +358,13 @@ details.trace summary::-webkit-details-marker { display: none; }
 .toast.err { border-color: #5c2424; }
 
 @media (max-width: 900px) {
-  .layout { grid-template-columns: 1fr; }
-  .sources { display: none; }
+  /* Stack the citation panel under the chat rather than hiding it. */
+  .layout { grid-template-columns: 1fr; grid-template-rows: minmax(0, 1fr) auto; }
+  .sources {
+    border-left: 0;
+    border-top: 1px solid var(--line);
+    max-height: 42dvh;
+  }
+  .sources-body { flex: 1; min-height: 0; }
   .suggestions { grid-template-columns: 1fr; }
 }

@@ -8,6 +8,7 @@ venv/
 .ruff_cache/
 
 # --- Local data & models --------------------------------------------------
+results.json
 data/index/
 data/docs/*.pdf
 !data/docs/.gitkeep

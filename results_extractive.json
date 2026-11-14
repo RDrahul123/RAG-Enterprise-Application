@@ -1,0 +1,30 @@
+{
+  "retrieval": {
+    "dense": {
+      "recall": 1.0,
+      "mrr": 0.969,
+      "ms": 9.7
+    },
+    "bm25": {
+      "recall": 0.969,
+      "mrr": 0.969,
+      "ms": 5.7
+    },
+    "hybrid": {
+      "recall": 1.0,
+      "mrr": 0.969,
+      "ms": 11.5
+    },
+    "rerank": {
+      "recall": 1.0,
+      "mrr": 1.0,
+      "ms": 41.8
+    }
+  },
+  "answers": {
+    "answer_accuracy": 0.875,
+    "grounded_rate": 1.0,
+    "citation_page_accuracy": 1.0,
+    "mean_ms": 42
+  }
+}
