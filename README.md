@@ -138,7 +138,8 @@ Decoding is greedy, so the numbers reproduce exactly.
 ## Quickstart
 
 ```bash
-git clone <your-repo-url> && cd rag-enterprise
+git clone https://github.com/RDrahul123/RAG-Document-Application.git
+cd RAG-Document-Application
 
 make install      # venv + dependencies
 make corpus       # generate 8 sample PDFs (25 pages)
@@ -275,7 +276,7 @@ the fraction of answer sentences with a valid citation.
 ## Project structure
 
 ```
-rag-enterprise/
+RAG-Document-Application/
 ├── rag.py            # load → chunk → index → search (FAISS + BM25 + rerank)
 ├── answer.py         # prompt → LLM or extractive → citations → grounding
 ├── app.py            # FastAPI routes + static UI
